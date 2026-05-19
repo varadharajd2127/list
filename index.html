@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZB Attendance System — Loyola College</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════ -->
+<div id="page-login" class="page active">
+  <div class="login-bg">
+    <div class="login-grid-overlay"></div>
+  </div>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="https://static.wixstatic.com/media/81ba89_81dcdb9d1e384b618fdc78760c61c426~mv2.png" alt="Loyola College" class="login-logo" onerror="this.style.display='none'">
+        <h1 class="login-college">Loyola College <span>(Autonomous)</span></h1>
+        <p class="login-dept">Dept. of Advanced Zoology &amp; Biotechnology</p>
+        <div class="login-divider"></div>
+        <p class="login-system">Attendance Management System</p>
+      </div>
+      <div class="login-body">
+        <div class="role-selector">
+          <button class="role-btn active" data-role="admin" onclick="selectRole('admin',this)">
+            <span class="role-icon">⬡</span> Admin / HOD
+          </button>
+          <button class="role-btn" data-role="staff" onclick="selectRole('staff',this)">
+            <span class="role-icon">◈</span> Staff
+          </button>
+        </div>
+        <div id="login-alert" class="login-alert hidden">Invalid credentials. Access denied.</div>
+        <div class="field-group">
+          <label>Username</label>
+          <input type="text" id="inp-user" autocomplete="off" placeholder="Enter your username">
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="inp-pass" placeholder="Enter your password">
+            <button class="pw-toggle" onclick="togglePw()" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <button class="btn-login" onclick="doLogin()">Sign In Securely</button>
+        <p class="login-note">🔒 Authorised personnel only · Session expires in 45 min</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN DASHBOARD
+═══════════════════════════════════════════════ -->
+<div id="page-app" class="page hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://static.wixstatic.com/media/81ba89_81dcdb9d1e384b618fdc78760c61c426~mv2.png" alt="Loyola" class="sb-logo-img" onerror="this.style.display='none'">
+      <div>
+        <div class="sb-college">Loyola College</div>
+        <div class="sb-dept">AZB Department</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">MAIN</div>
+      <a class="nav-item active" data-page="dashboard" onclick="navTo('dashboard',this)">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a class="nav-item" data-page="generate" onclick="navTo('generate',this)">
+        <span class="nav-icon">⊕</span> Generate Sheet
+      </a>
+      <div class="nav-group-label admin-only">MANAGEMENT</div>
+      <a class="nav-item admin-only" data-page="students" onclick="navTo('students',this)">
+        <span class="nav-icon">◉</span> Student Database
+      </a>
+      <a class="nav-item admin-only" data-page="academic" onclick="navTo('academic',this)">
+        <span class="nav-icon">◈</span> Academic Years
+      </a>
+      <a class="nav-item admin-only" data-page="users" onclick="navTo('users',this)">
+        <span class="nav-icon">⬡</span> User Management
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sb-avatar">A</div>
+        <div>
+          <div class="user-name" id="sb-name">Admin</div>
+          <div class="user-role" id="sb-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h2 class="topbar-title" id="topbar-title">Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="session-timer" id="session-timer">⏱ 45:00</div>
+        <div class="academic-badge" id="active-ay-badge">—</div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <section id="sec-dashboard" class="content-section active">
+      <div class="dash-grid">
+        <div class="stat-card maroon">
+          <div class="stat-icon">◉</div>
+          <div class="stat-val" id="stat-students">0</div>
+          <div class="stat-label">Students (Active Year)</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">⊕</div>
+          <div class="stat-val" id="stat-sheets">0</div>
+          <div class="stat-label">Sheets Generated</div>
+        </div>
+        <div class="stat-card dark">
+          <div class="stat-icon">◈</div>
+          <div class="stat-val" id="stat-classes">0</div>
+          <div class="stat-label">Classes</div>
+        </div>
+        <div class="stat-card slate">
+          <div class="stat-icon">⬡</div>
+          <div class="stat-val" id="stat-year">—</div>
+          <div class="stat-label">Active Academic Year</div>
+        </div>
+      </div>
+      <div class="dash-recent">
+        <div class="section-hdr"><h3>Recent Activity</h3></div>
+        <div class="activity-list" id="activity-list">
+          <div class="activity-empty">No activity yet. Generate your first sheet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── GENERATE SHEET ── -->
+    <section id="sec-generate" class="content-section hidden">
+      <div class="gen-layout">
+
+        <!-- LEFT: CONFIG PANEL -->
+        <div class="gen-panel" id="gen-config-panel">
+
+          <!-- STEP 1: EVENT DETAILS -->
+          <div class="config-card">
+            <div class="config-card-hdr">
+              <span class="step-badge">1</span>
+              <div>
+                <div class="config-card-title">Event Details</div>
+                <div class="config-card-sub">Programme / seminar / meeting information</div>
+              </div>
+            </div>
+            <div class="fields-grid-2">
+              <div class="field-wrap full">
+                <label>Event / Programme Name <span class="req">*</span></label>
+                <input type="text" id="ev-name" placeholder="e.g. National Science Day Seminar 2026">
+              </div>
+              <div class="field-wrap full">
+                <label>Venue <span class="req">*</span></label>
+                <input type="text" id="ev-venue" placeholder="e.g. Seminar Hall, Block A">
+              </div>
+              <div class="field-wrap">
+                <label>Date <span class="req">*</span></label>
+                <input type="date" id="ev-date">
+              </div>
+              <div class="field-wrap">
+                <label>Day (auto)</label>
+                <input type="text" id="ev-day" readonly placeholder="Auto-filled" class="readonly-field">
+              </div>
+              <div class="field-wrap">
+                <label>Time From</label>
+                <input type="time" id="ev-time-from">
+              </div>
+              <div class="field-wrap">
+                <label>Time To</label>
+                <input type="time" id="ev-time-to">
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: CLASS SELECTION -->
+          <div class="config-card">
+            <div class="config-card-hdr">
+              <span class="step-badge">2</span>
+              <div>
+                <div class="config-card-title">Class Selection</div>
+                <div class="config-card-sub">Select one or more classes — each prints as a separate sheet</div>
+              </div>
+            </div>
+            <div class="class-selector-wrap" id="class-selector-wrap">
+              <!-- populated by JS -->
+            </div>
+            <div class="selected-classes-preview" id="selected-classes-preview"></div>
+          </div>
+
+          <!-- STEP 3: PRINT COLUMNS -->
+          <div class="config-card">
+            <div class="config-card-hdr">
+              <span class="step-badge">3</span>
+              <div>
+                <div class="config-card-title">Columns to Print</div>
+                <div class="config-card-sub">Choose student details &amp; signature columns</div>
+              </div>
+            </div>
+            <div class="col-section-title">Student Detail Columns</div>
+            <div class="checkbox-grid" id="detail-cols">
+              <label class="cb-item locked"><input type="checkbox" checked disabled> Sl. No.</label>
+              <label class="cb-item locked"><input type="checkbox" checked disabled> Dept. No.</label>
+              <label class="cb-item locked"><input type="checkbox" checked disabled> Full Name</label>
+              <label class="cb-item"><input type="checkbox" id="col-rollno"> Roll Number</label>
+              <label class="cb-item"><input type="checkbox" id="col-dob"> Date of Birth</label>
+              <label class="cb-item"><input type="checkbox" id="col-contact"> Contact No.</label>
+              <label class="cb-item"><input type="checkbox" id="col-email"> Email</label>
+              <label class="cb-item"><input type="checkbox" id="col-father"> Father's Name</label>
+              <label class="cb-item"><input type="checkbox" id="col-mother"> Mother's Name</label>
+              <label class="cb-item"><input type="checkbox" id="col-parent-contact"> Parent Contact</label>
+            </div>
+            <div class="col-section-title" style="margin-top:16px">Signature Columns</div>
+            <div id="sig-cols-list">
+              <div class="sig-col-row">
+                <input type="text" value="Signature" placeholder="Column heading">
+                <button class="btn-icon-remove" onclick="removeSigCol(this)" title="Remove">✕</button>
+              </div>
+            </div>
+            <button class="btn-add-sig" onclick="addSigCol()">+ Add Signature Column</button>
+          </div>
+
+          <!-- STEP 4: PRINT SETTINGS -->
+          <div class="config-card">
+            <div class="config-card-hdr">
+              <span class="step-badge">4</span>
+              <div>
+                <div class="config-card-title">Print Settings</div>
+                <div class="config-card-sub">Orientation, language &amp; layout preferences</div>
+              </div>
+            </div>
+            <div class="fields-grid-2">
+              <div class="field-wrap">
+                <label>Orientation</label>
+                <div class="toggle-group">
+                  <button class="toggle-btn active" id="orient-portrait" onclick="setOrientation('portrait',this)">⬜ Portrait (A4)</button>
+                  <button class="toggle-btn" id="orient-landscape" onclick="setOrientation('landscape',this)">⬛ Landscape (A4)</button>
+                </div>
+              </div>
+              <div class="field-wrap">
+                <label>Sheet Language</label>
+                <select id="sheet-lang">
+                  <option value="en">English</option>
+                  <option value="ta">தமிழ் / Tamil</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5: FOOTER / SIGNATORIES -->
+          <div class="config-card">
+            <div class="config-card-hdr">
+              <span class="step-badge">5</span>
+              <div>
+                <div class="config-card-title">Signatories &amp; Footer</div>
+                <div class="config-card-sub">HOD is mandatory. Others appear only if filled.</div>
+              </div>
+            </div>
+
+            <!-- HOD — always shown -->
+            <div class="signatory-block mandatory">
+              <div class="sig-block-label">Head of Department <span class="mandatory-tag">Required</span></div>
+              <div class="fields-grid-3">
+                <div class="field-wrap"><label>Name</label><input type="text" id="hod-name" placeholder="Dr. / Prof."></div>
+                <div class="field-wrap"><label>Designation</label><input type="text" id="hod-desig" value="Head of the Department"></div>
+                <div class="field-wrap"><label>Show Department?</label>
+                  <select id="hod-show-dept">
+                    <option value="yes">Yes — show dept. name</option>
+                    <option value="no">No — name &amp; designation only</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- OPTIONAL SIGNATORIES -->
+            <div id="optional-sigs"></div>
+            <button class="btn-add-sig" onclick="addOptionalSig()">+ Add Signatory</button>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn-ghost" onclick="resetGen()">Reset</button>
+            <button class="btn-preview" onclick="openPreview()">Preview &amp; Print →</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── STUDENT DATABASE ── -->
+    <section id="sec-students" class="content-section hidden admin-only">
+      <div class="db-toolbar">
+        <div class="db-toolbar-left">
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="student-search" placeholder="Search by name, dept no, roll no…" oninput="filterStudents()">
+          </div>
+          <select id="filter-class" onchange="filterStudents()" class="filter-select">
+            <option value="">All Classes</option>
+          </select>
+          <select id="filter-ay" onchange="filterStudents()" class="filter-select">
+            <option value="">All Academic Years</option>
+          </select>
+        </div>
+        <div class="db-toolbar-right">
+          <button class="btn-ghost" onclick="openImportModal()">⤓ Import CSV / Excel</button>
+          <button class="btn-primary" onclick="openAddStudent()">+ Add Student</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="students-table">
+          <thead>
+            <tr>
+              <th>Dept. No.</th>
+              <th>Roll No.</th>
+              <th>Full Name</th>
+              <th>Class</th>
+              <th>Academic Year</th>
+              <th>Contact</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody"></tbody>
+        </table>
+        <div class="table-empty" id="students-empty">No students found. Add students or import a file.</div>
+      </div>
+    </section>
+
+    <!-- ── ACADEMIC YEARS ── -->
+    <section id="sec-academic" class="content-section hidden admin-only">
+      <div class="db-toolbar">
+        <div class="db-toolbar-left"><h3 style="color:#fff;font-size:15px">Academic Year Management</h3></div>
+        <div class="db-toolbar-right">
+          <button class="btn-primary" onclick="openAddAY()">+ New Academic Year</button>
+        </div>
+      </div>
+      <div class="ay-grid" id="ay-grid"></div>
+    </section>
+
+    <!-- ── USER MANAGEMENT ── -->
+    <section id="sec-users" class="content-section hidden admin-only">
+      <div class="db-toolbar">
+        <div class="db-toolbar-left"><h3 style="color:#fff;font-size:15px">Staff Accounts</h3></div>
+        <div class="db-toolbar-right">
+          <button class="btn-primary" onclick="openAddUser()">+ Add Staff Account</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════ -->
+
+<!-- Add/Edit Student Modal -->
+<div id="modal-student" class="modal-overlay hidden">
+  <div class="modal-box large">
+    <div class="modal-hdr">
+      <h3 id="modal-student-title">Add Student</h3>
+      <button class="modal-close" onclick="closeModal('modal-student')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fields-grid-3">
+        <div class="field-wrap"><label>Department Number <span class="req">*</span></label><input type="text" id="s-deptno" placeholder="e.g. AZB-001"></div>
+        <div class="field-wrap"><label>Roll Number</label><input type="text" id="s-rollno" placeholder="e.g. 23AZB001"></div>
+        <div class="field-wrap"><label>Full Name <span class="req">*</span></label><input type="text" id="s-name" placeholder="Full name as in records"></div>
+        <div class="field-wrap"><label>Date of Birth</label><input type="date" id="s-dob"></div>
+        <div class="field-wrap"><label>Contact Number</label><input type="tel" id="s-contact" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="field-wrap"><label>Email Address</label><input type="email" id="s-email" placeholder="student@mail.com"></div>
+        <div class="field-wrap"><label>Father's Name</label><input type="text" id="s-father" placeholder="Father's full name"></div>
+        <div class="field-wrap"><label>Mother's Name</label><input type="text" id="s-mother" placeholder="Mother's full name"></div>
+        <div class="field-wrap"><label>Parent Contact</label><input type="tel" id="s-parent-contact" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="field-wrap">
+          <label>Class / Section <span class="req">*</span></label>
+          <select id="s-class">
+            <option value="">Select Class</option>
+            <option>I B.Sc. Zoology</option>
+            <option>II B.Sc. Zoology</option>
+            <option>III B.Sc. Zoology</option>
+            <option>I B.Sc. Biotechnology</option>
+            <option>II B.Sc. Biotechnology</option>
+            <option>III B.Sc. Biotechnology</option>
+            <option>I M.Sc. Zoology</option>
+            <option>II M.Sc. Zoology</option>
+            <option>I M.Sc. Biotechnology</option>
+            <option>II M.Sc. Biotechnology</option>
+            <option>M.Phil. Zoology</option>
+            <option>M.Phil. Biotechnology</option>
+            <option>Ph.D. Zoology</option>
+            <option>Ph.D. Biotechnology</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label>Batch</label>
+          <input type="text" id="s-batch" placeholder="e.g. 25-UAZ">
+        </div>
+        <div class="field-wrap">
+          <label>Academic Year <span class="req">*</span></label>
+          <select id="s-ay"></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-student')">Cancel</button>
+      <button class="btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Academic Year Modal -->
+<div id="modal-ay" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>New Academic Year</h3>
+      <button class="modal-close" onclick="closeModal('modal-ay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fields-grid-2">
+        <div class="field-wrap"><label>Label <span class="req">*</span></label><input type="text" id="ay-label" placeholder="e.g. 2026–2027"></div>
+        <div class="field-wrap"><label>Start Date <span class="req">*</span></label><input type="date" id="ay-start"></div>
+        <div class="field-wrap"><label>End Date <span class="req">*</span></label><input type="date" id="ay-end"></div>
+        <div class="field-wrap">
+          <label>Set as Active</label>
+          <select id="ay-active">
+            <option value="yes">Yes — make this the active year</option>
+            <option value="no">No — save as inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-ay')">Cancel</button>
+      <button class="btn-primary" onclick="saveAY()">Save Academic Year</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div id="modal-user" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>Add Staff Account</h3>
+      <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fields-grid-2">
+        <div class="field-wrap"><label>Full Name <span class="req">*</span></label><input type="text" id="u-name" placeholder="Dr. / Mr. / Ms."></div>
+        <div class="field-wrap"><label>Username <span class="req">*</span></label><input type="text" id="u-username" placeholder="Unique login ID"></div>
+        <div class="field-wrap"><label>Password <span class="req">*</span></label><input type="password" id="u-pass" placeholder="Min. 8 characters"></div>
+        <div class="field-wrap">
+          <label>Role</label>
+          <select id="u-role">
+            <option value="staff">Staff</option>
+            <option value="admin">Admin / HOD</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-user')">Cancel</button>
+      <button class="btn-primary" onclick="saveUser()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div id="modal-import" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>Import Student Data</h3>
+      <button class="modal-close" onclick="closeModal('modal-import')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-info">
+        <p>Upload a <strong>CSV</strong> file with columns in this order:</p>
+        <code>DeptNo, RollNo, FullName, DOB, Class, Batch, Contact, Email, FatherName, MotherName, ParentContact, AcademicYear</code>
+        <a href="#" onclick="downloadTemplate()" class="link-download">⤓ Download template CSV</a>
+      </div>
+      <div class="field-wrap" style="margin-top:16px">
+        <label>Academic Year (for this import)</label>
+        <select id="import-ay"></select>
+      </div>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('csv-file-input').click()">
+        <div class="drop-icon">📄</div>
+        <div>Click to browse or drag &amp; drop CSV file</div>
+        <div class="drop-sub">Supports .csv files up to 5 MB</div>
+      </div>
+      <input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="handleCSV(this)">
+      <div id="import-preview"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-import')">Cancel</button>
+      <button class="btn-primary" id="btn-confirm-import" onclick="confirmImport()" disabled>Import Students</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT PREVIEW OVERLAY -->
+<div id="print-overlay" class="print-overlay hidden">
+  <div class="print-toolbar no-print">
+    <div class="print-tb-left">
+      <button class="btn-ghost-white" onclick="closePrintOverlay()">← Back</button>
+      <span class="print-sheet-count" id="print-sheet-count">1 sheet</span>
+    </div>
+    <div class="print-tb-right">
+      <button class="btn-print-action" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+  <div class="print-pages-container" id="print-pages-container"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
