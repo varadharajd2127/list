@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AZB Attendance System — Loyola College</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & ROOT ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --maroon:#7B1D2E;--maroon2:#9B2A3E;--maroon3:#5C1422;
+  --gold:#C08B3A;--gold2:#E8B96A;--gold3:#F5E0B0;
+  --white:#FFFFFF;--off:#F8F6F2;--bg:#F4F1EC;
+  --border:#DDD8CE;--border2:#EAE6DE;
+  --text:#1A1410;--text2:#4A3F35;--text3:#8A7F74;
+  --green:#1A6B3C;--red:#B02020;--blue:#1A4A8A;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow2:0 8px 32px rgba(0,0,0,.12);
+  --r:8px;--r2:4px;
+}
+html{font-size:14px;height:100%}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);height:100%;line-height:1.5;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit;font-size:inherit}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ===== UTILITY ===== */
+.hidden{display:none!important}
+.req{color:var(--maroon);font-size:11px}
+.tag{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.4px}
+.tag-active{background:#D4EDDA;color:#155724;border:1px solid #A3CDB1}
+.tag-inactive{background:#F4F1EC;color:var(--text3);border:1px solid var(--border)}
+.tag-admin{background:#FAE8D0;color:#7B3A00;border:1px solid #E8C49A}
+.tag-staff{background:#D8EAF8;color:#1A3A6A;border:1px solid #A8C8E8}
+
+/* ===== LOGIN ===== */
+#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#F8F5F0 0%,#EDE8E0 40%,#E4DDD4 100%);
+  position:relative;overflow:hidden}
+#pg-login::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;
+  border-radius:50%;background:radial-gradient(circle,rgba(123,29,46,.06) 0%,transparent 70%)}
+#pg-login::after{content:'';position:absolute;bottom:-150px;left:-150px;width:400px;height:400px;
+  border-radius:50%;background:radial-gradient(circle,rgba(192,139,58,.08) 0%,transparent 70%)}
+
+.login-card{width:100%;max-width:420px;background:var(--white);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.14),0 4px 16px rgba(0,0,0,.08);
+  overflow:hidden;position:relative;z-index:1;margin:20px}
+
+.lc-head{background:linear-gradient(135deg,var(--maroon3) 0%,var(--maroon) 60%,var(--maroon2) 100%);
+  padding:32px 32px 28px;text-align:center;position:relative}
+.lc-head::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.lc-logo{width:64px;height:64px;object-fit:contain;margin-bottom:12px;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+.lc-college{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;line-height:1.3}
+.lc-college em{font-style:normal;opacity:.7;font-size:15px;font-weight:500}
+.lc-dept{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;letter-spacing:.8px;text-transform:uppercase}
+.lc-badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.8);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 14px;border-radius:20px;margin-top:10px}
+
+.lc-body{padding:28px 32px 32px}
+
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:22px}
+.rtab{padding:9px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;
+  background:transparent;border:none;color:var(--text3);transition:all .2s;letter-spacing:.3px}
+.rtab.on{background:var(--maroon);color:#fff}
+
+.fl{margin-bottom:16px}
+.fl label{display:block;font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--text2);margin-bottom:6px}
+.fl input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r);
+  color:var(--text);background:var(--off);font-size:14px;transition:all .2s}
+.fl input:focus{outline:none;border-color:var(--maroon);background:#fff;
+  box-shadow:0 0 0 3px rgba(123,29,46,.08)}
+.pw-w{position:relative}
+.pw-w input{padding-right:42px}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);opacity:.7}
+
+.btn-signin{width:100%;padding:12px;background:var(--maroon);border:none;border-radius:var(--r);
+  color:#fff;font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;
+  transition:all .2s;margin-top:4px;box-shadow:0 4px 12px rgba(123,29,46,.3)}
+.btn-signin:hover{background:var(--maroon2);box-shadow:0 6px 20px rgba(123,29,46,.4);transform:translateY(-1px)}
+.btn-signin:active{transform:translateY(0)}
+
+.login-err{background:#FEF0F0;border:1px solid #FBCACA;border-radius:var(--r);
+  padding:10px 14px;font-size:12.5px;color:var(--red);margin-bottom:14px;display:none}
+.login-note{text-align:center;font-size:11px;color:var(--text3);margin-top:16px}
+
+/* ===== APP SHELL ===== */
+#pg-app{display:none;height:100vh;width:100vw;overflow:hidden;
+  grid-template-columns:240px 1fr;grid-template-rows:1fr}
+
+/* ===== SIDEBAR ===== */
+.sidebar{background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;overflow-y:auto;
+  grid-row:1;grid-column:1;position:relative;z-index:10}
+
+.sb-head{padding:18px 16px 14px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;gap:10px}
+.sb-logo{width:34px;height:34px;object-fit:contain;flex-shrink:0}
+.sb-title{line-height:1.2}
+.sb-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--text)}
+.sb-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.3px}
+
+.sb-nav{flex:1;padding:12px 8px}
+.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text3);padding:10px 10px 6px;margin-top:4px}
+.nav-label:first-child{margin-top:0}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);
+  color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s;margin-bottom:1px;user-select:none;border:none;background:none;width:100%;text-align:left}
+.ni:hover{background:var(--off);color:var(--text)}
+.ni.on{background:rgba(123,29,46,.07);color:var(--maroon);font-weight:600}
+.ni-icon{width:18px;text-align:center;font-size:15px;opacity:.8;flex-shrink:0}
+
+.sb-foot{padding:14px 16px;border-top:1px solid var(--border2)}
+.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sb-av{width:34px;height:34px;background:var(--maroon);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:600;color:var(--text);line-height:1.2}
+.sb-urole{font-size:10px;color:var(--text3)}
+.btn-lo{width:100%;padding:8px;background:transparent;border:1px solid var(--border);
+  border-radius:var(--r2);color:var(--text3);font-size:12px;font-weight:500;cursor:pointer;
+  transition:all .2s}
+.btn-lo:hover{border-color:var(--red);color:var(--red);background:#FEF0F0}
+
+/* ===== TOPBAR ===== */
+.main-area{grid-column:2;grid-row:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);
+  height:54px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;flex-shrink:0}
+.tb-left{display:flex;align-items:center;gap:12px}
+.menu-btn{display:none;background:none;border:none;font-size:20px;cursor:pointer;
+  color:var(--text2);padding:4px;margin-right:4px}
+.tb-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-timer{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums;
+  background:var(--off);padding:4px 10px;border-radius:20px;border:1px solid var(--border2)}
+.tb-ay{font-size:11px;color:var(--maroon);background:rgba(123,29,46,.07);
+  border:1px solid rgba(123,29,46,.2);padding:4px 12px;border-radius:20px;font-weight:600}
+
+/* ===== CONTENT ===== */
+.content{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.sec{display:none}.sec.on{display:block}
+
+/* ===== DASHBOARD ===== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);
+  padding:20px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat.s1::before{background:linear-gradient(90deg,var(--maroon),var(--maroon2))}
+.stat.s2::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.stat.s3::before{background:linear-gradient(90deg,var(--green),#2A9D5C)}
+.stat.s4::before{background:linear-gradient(90deg,var(--blue),#2A6ED8)}
+.stat-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--text);line-height:1;margin-bottom:5px}
+.stat-l{font-size:12px;color:var(--text3);font-weight:500}
+.stat-icon{position:absolute;right:16px;top:18px;font-size:22px;opacity:.12}
+
+.card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.card-hdr{padding:16px 20px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.card-hdr h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--text)}
+.card-body{padding:0}
+
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border2);font-size:13px}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:7px;height:7px;background:var(--maroon);border-radius:50%;margin-top:5px;flex-shrink:0}
+.act-text{flex:1;color:var(--text2);line-height:1.5}
+.act-time{font-size:11px;color:var(--text3);white-space:nowrap;margin-top:1px}
+.act-empty{padding:24px;text-align:center;color:var(--text3);font-size:13px}
+
+/* ===== SECTION HEADING ===== */
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.sec-hdr-l h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text)}
+.sec-hdr-l p{font-size:12.5px;color:var(--text3);margin-top:2px}
+
+/* ===== CONFIG STEPS ===== */
+.steps{display:flex;flex-direction:column;gap:18px;max-width:820px}
+.step-card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.step-hdr{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;border-bottom:1px solid var(--border2)}
+.step-badge{width:26px;height:26px;background:var(--maroon);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px}
+.step-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+.step-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.step-body{padding:18px 20px}
+
+/* FORM GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+@media(max-width:700px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.span2{grid-column:span 2}
+@media(max-width:700px){.span2{grid-column:span 1}}
+
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2)}
+.f input,.f select,.f textarea{
+  padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r2);
+  color:var(--text);background:var(--off);font-size:13.5px;width:100%;transition:all .2s}
+.f input:focus,.f select:focus,.f textarea:focus{
+  outline:none;border-color:var(--maroon);background:#fff;box-shadow:0 0 0 3px rgba(123,29,46,.07)}
+.f input[readonly]{background:var(--bg);color:var(--text3);cursor:default}
+select option{background:#fff;color:var(--text)}
+
+/* CLASS CHIPS */
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:12px}
+.cls-chip{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:var(--r2);cursor:pointer;transition:all .15s;user-select:none;background:var(--off)}
+.cls-chip:hover{border-color:var(--maroon);background:rgba(123,29,46,.03)}
+.cls-chip.on{border-color:var(--maroon);background:rgba(123,29,46,.06)}
+.cls-chip input{accent-color:var(--maroon);cursor:pointer;flex-shrink:0}
+.cls-chip-name{font-size:13px;color:var(--text);font-weight:500;flex:1}
+.cls-chip-cnt{font-size:11px;color:var(--text3);background:var(--bg);
+  padding:1px 7px;border-radius:10px;border:1px solid var(--border2)}
+.cls-preview{display:flex;flex-wrap:wrap;gap:6px;min-height:8px}
+.cls-pill{background:rgba(123,29,46,.08);border:1px solid rgba(123,29,46,.2);
+  color:var(--maroon);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+
+/* CHECKBOX GRID */
+.cb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.cb-item{display:flex;align-items:center;gap:8px;padding:8px 11px;
+  border:1.5px solid var(--border);border-radius:var(--r2);cursor:pointer;
+  font-size:13px;color:var(--text2);transition:all .15s;user-select:none;background:var(--off)}
+.cb-item:hover:not(.locked){border-color:var(--border);background:#fff}
+.cb-item input[type=checkbox]:checked+span{color:var(--text);font-weight:600}
+.cb-item input{accent-color:var(--maroon)}
+.cb-item.locked{opacity:.55;cursor:not-allowed}
+.col-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;margin-top:14px}
+.col-label:first-child{margin-top:0}
+
+/* SIG COLS */
+.sig-row{display:flex;gap:8px;margin-bottom:7px}
+.sig-row input{flex:1;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r2);
+  background:var(--off);color:var(--text);font-size:13px;transition:all .2s}
+.sig-row input:focus{outline:none;border-color:var(--maroon);background:#fff}
+.btn-rm{width:34px;height:34px;background:#FEF0F0;border:1px solid #FBCACA;
+  border-radius:var(--r2);color:var(--red);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.btn-rm:hover{background:#FBCACA}
+
+/* TOGGLE */
+.tog-group{display:flex;border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;width:fit-content}
+.tog-btn{padding:8px 16px;background:transparent;border:none;color:var(--text3);
+  font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tog-btn.on{background:var(--maroon);color:#fff}
+
+/* SIGNATORY BLOCK */
+.sig-block{background:var(--off);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:10px}
+.sig-block.mandatory{border-color:rgba(123,29,46,.25);background:rgba(123,29,46,.02)}
+.sig-bl{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sig-bl-name{font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:8px}
+.req-tag{font-size:10px;background:rgba(123,29,46,.1);color:var(--maroon);
+  border:1px solid rgba(123,29,46,.2);padding:2px 8px;border-radius:20px;font-weight:700}
+
+/* BUTTONS */
+.btn{padding:9px 20px;border-radius:var(--r2);font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;border:none}
+.btn-primary{background:var(--maroon);color:#fff;box-shadow:0 2px 8px rgba(123,29,46,.25)}
+.btn-primary:hover{background:var(--maroon2);box-shadow:0 4px 12px rgba(123,29,46,.35)}
+.btn-ghost{background:#fff;color:var(--text2);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--maroon);color:var(--maroon);background:rgba(123,29,46,.03)}
+.btn-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(192,139,58,.3)}
+.btn-gold:hover{background:#B07830;box-shadow:0 4px 12px rgba(192,139,58,.4)}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.act-bar{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;padding-top:6px}
+
+/* ===== STUDENT DB ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:18px;flex-wrap:wrap}
+.tbl-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1}
+.tbl-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.search-wrap{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);
+  border-radius:var(--r2);padding:7px 12px;min-width:220px;flex:1;max-width:320px}
+.search-wrap input{flex:1;border:none;background:none;color:var(--text);font-size:13px;outline:none}
+.search-icon{color:var(--text3);font-size:14px;flex-shrink:0}
+.flt{padding:7px 11px;border:1.5px solid var(--border);border-radius:var(--r2);
+  background:#fff;color:var(--text);font-size:13px;cursor:pointer}
+.flt:focus{outline:none;border-color:var(--maroon)}
+
+.tbl-wrap{background:#fff;border:1px solid var(--border2);border-radius:var(--r);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--off);color:var(--text2);font-size:11px;font-weight:800;
+  letter-spacing:.8px;text-transform:uppercase;padding:11px 14px;
+  text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border2);color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(123,29,46,.02)}
+.tbl-empty{padding:36px;text-align:center;color:var(--text3);font-size:13px}
+
+/* ===== AY CARDS ===== */
+.ay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.ay-card{background:#fff;border:1px solid var(--border2);border-radius:var(--r);padding:20px;position:relative}
+.ay-card.ay-active{border-color:rgba(123,29,46,.3);border-width:2px}
+.ay-card.ay-active::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--maroon),var(--gold));border-radius:var(--r) var(--r) 0 0}
+.ay-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ay-dates{font-size:12px;color:var(--text3);margin-bottom:12px}
+.ay-actions{display:flex;gap:8px;margin-top:14px}
+.btn-ay-act{padding:6px 14px;background:var(--maroon);border:none;border-radius:var(--r2);
+  color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-ay-act:hover{background:var(--maroon2)}
+.btn-ay-del{padding:6px 14px;background:transparent;border:1.5px solid var(--border);
+  border-radius:var(--r2);color:var(--text3);font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-ay-del:hover{border-color:var(--red);color:var(--red);background:#FEF0F0}
+
+/* ===== MODALS ===== */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px)}
+.modal-box{background:#fff;border-radius:12px;width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.2)}
+.modal-box.lg{max-width:720px}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border2)}
+.modal-hd h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)}
+.modal-cl{background:none;border:none;font-size:18px;color:var(--text3);cursor:pointer;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;transition:all .2s}
+.modal-cl:hover{background:var(--off);color:var(--text)}
+.modal-bd{padding:22px 24px}
+.modal-ft{padding:14px 24px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:10px}
+
+/* IMPORT */
+.imp-info{background:rgba(123,29,46,.04);border:1px solid rgba(123,29,46,.15);
+  border-radius:var(--r);padding:14px 16px;font-size:12.5px;color:var(--text2);margin-bottom:14px}
+.imp-info code{display:block;margin:8px 0 6px;padding:8px 10px;background:rgba(0,0,0,.05);
+  border-radius:4px;font-size:11px;color:var(--maroon);word-break:break-all}
+.dl-link{color:var(--maroon);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline}
+.drop-z{border:2px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;
+  cursor:pointer;transition:all .2s;color:var(--text3);font-size:13px;margin-top:4px}
+.drop-z:hover{border-color:var(--maroon);background:rgba(123,29,46,.02);color:var(--text2)}
+.drop-icon{font-size:28px;margin-bottom:8px}
+.drop-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* ===== PRINT OVERLAY ===== */
+#print-ov{position:fixed;inset:0;background:#D8D4CC;z-index:600;overflow-y:auto;display:none}
+.print-bar{background:#fff;border-bottom:1px solid var(--border);
+  height:52px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:sticky;top:0;z-index:10}
+.print-bar-l{display:flex;align-items:center;gap:14px}
+.print-sc{font-size:12px;color:var(--text3)}
+.btn-print-main{padding:10px 24px;background:var(--maroon);border:none;border-radius:var(--r);
+  color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  box-shadow:0 2px 10px rgba(123,29,46,.3);transition:all .2s}
+.btn-print-main:hover{background:var(--maroon2);box-shadow:0 4px 16px rgba(123,29,46,.4)}
+.print-pages{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px}
+
+/* ===== A4 SHEET ===== */
+.a4{background:#fff;font-family:'Times New Roman',Times,serif;color:#111;
+  box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.a4.portrait{width:210mm;min-height:297mm;padding:13mm 15mm 18mm}
+.a4.landscape{width:297mm;min-height:210mm;padding:11mm 15mm 16mm}
+
+.sh-head{display:flex;align-items:center;gap:14px;padding-bottom:10px;
+  margin-bottom:10px;border-bottom:3px double #7B1D2E}
+.sh-logo{width:58px;height:58px;object-fit:contain;flex-shrink:0}
+.sh-head-text{flex:1;text-align:center}
+.sh-college{font-family:'Times New Roman',serif;font-size:17pt;font-weight:700;
+  color:#7B1D2E;line-height:1.2;letter-spacing:.2px}
+.sh-est{font-size:8.5pt;color:#555;margin-top:2px;letter-spacing:.5px}
+.sh-dept{font-size:11.5pt;font-weight:700;color:#222;margin-top:4px}
+
+.sh-title-wrap{text-align:center;margin:10px 0}
+.sh-title{display:inline-block;border:1.5px solid #7B1D2E;
+  padding:5px 24px;font-size:10.5pt;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:#7B1D2E}
+
+.sh-meta{border:1px solid #AAA;display:grid;grid-template-columns:1fr 1fr;margin-bottom:10px;font-size:9pt}
+.sh-mc{padding:5px 10px;border-right:1px solid #CCC;border-bottom:1px solid #CCC;display:flex;gap:6px;line-height:1.5}
+.sh-mc:nth-child(2n){border-right:none}
+.sh-mc:nth-last-child(-n+2){border-bottom:none}
+.sh-ml{font-weight:700;min-width:72px;color:#333;white-space:nowrap}
+.sh-mv{color:#111}
+
+.sh-table{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10px}
+.sh-table th{background:#7B1D2E;color:#fff;padding:6px 7px;font-weight:700;
+  font-size:8.5pt;letter-spacing:.4px;border:1px solid #5C1422;text-align:left;white-space:nowrap}
+.sh-table td{border:1px solid #BBB;padding:6px 7px;vertical-align:middle}
+.sh-table tr:nth-child(even) td{background:#F9F7F4}
+.td-num{text-align:center;width:26px;font-weight:700}
+.td-dept{width:76px;font-weight:600}
+.td-sig{min-width:70px;height:30px}
+
+.sh-totals{display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px}
+.sh-tot{border:1.5px solid #7B1D2E;text-align:center;min-width:125px}
+.sh-tot-l{background:#7B1D2E;color:#fff;font-size:8pt;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;padding:4px 8px}
+.sh-tot-v{font-family:'Times New Roman',serif;font-size:24pt;font-weight:700;
+  color:#7B1D2E;padding:8px 12px;line-height:1}
+.sh-tot-v.att{color:#1A6B3C}
+
+.sh-foot{border-top:1.5px solid #7B1D2E;padding-top:14px}
+.sh-sigs{display:flex;gap:16px;justify-content:space-between}
+.sh-sig{text-align:center;flex:1}
+.sh-sign-area{height:52px;border-bottom:1px solid #333;margin-bottom:6px}
+.sh-sig-name{font-size:9pt;font-weight:700;color:#111}
+.sh-sig-desig{font-size:8.5pt;color:#333;margin-top:1px}
+.sh-sig-dept{font-size:8pt;color:#555;margin-top:1px}
+
+/* ===== PRINT MEDIA ===== */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{margin:0;padding:0;background:#fff!important;height:auto}
+  #pg-login,#pg-app{display:none!important}
+  #print-ov{position:static!important;background:#fff!important;overflow:visible!important;display:block!important}
+  .no-print{display:none!important}
+  .print-bar{display:none!important}
+  .print-pages{padding:0!important;gap:0!important;display:block!important}
+  .a4{box-shadow:none!important;page-break-after:always;break-after:page}
+  .a4:last-child{page-break-after:avoid;break-after:avoid}
+  .a4.portrait{width:210mm!important;min-height:0!important;padding:10mm 12mm 14mm!important}
+  .a4.landscape{width:297mm!important;min-height:0!important;padding:9mm 12mm 12mm!important}
+  @page{margin:0;size:A4}
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  #pg-app{grid-template-columns:1fr!important}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:200;
+    transition:left .3s ease;box-shadow:none}
+  .sidebar.open{left:0;box-shadow:var(--shadow2)}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199}
+  .sidebar-overlay.show{display:block}
+  .menu-btn{display:block}
+  .main-area{grid-column:1}
+  .content{padding:16px}
+  .g3,.g4{grid-template-columns:1fr 1fr!important}
+  .a4.portrait{width:100%!important;min-height:auto!important;padding:6mm 8mm!important}
+  .a4.landscape{width:100%!important;min-height:auto!important;padding:6mm 8mm!important}
+  .print-pages{padding:12px!important}
+}
+@media(max-width:600px){
+  .g2,.g3,.g4{grid-template-columns:1fr!important}
+  .stats{grid-template-columns:1fr 1fr}
+  .topbar{padding:0 14px}
+  .tb-timer,.tb-ay{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="pg-login">
+  <div class="login-card">
+    <div class="lc-head">
+      <img src="https://static.wixstatic.com/media/81ba89_81dcdb9d1e384b618fdc78760c61c426~mv2.png"
+           alt="Loyola" class="lc-logo" onerror="this.style.display='none'">
+      <div class="lc-college">Loyola College <em>(Autonomous)</em></div>
+      <div class="lc-dept">Advanced Zoology &amp; Biotechnology</div>
+      <div class="lc-badge">Attendance Management System</div>
+    </div>
+    <div class="lc-body">
+      <div class="role-tabs">
+        <button class="rtab on" onclick="setRole('admin',this)">Admin / HOD</button>
+        <button class="rtab" onclick="setRole('staff',this)">Staff</button>
+      </div>
+      <div class="login-err" id="lerr">Invalid credentials. Access denied.</div>
+      <div class="fl"><label>Username</label>
+        <input type="text" id="lu" placeholder="Enter username" autocomplete="off"></div>
+      <div class="fl"><label>Password</label>
+        <div class="pw-w">
+          <input type="password" id="lp" placeholder="Enter password">
+          <button class="pw-eye" onclick="togglePw()">👁</button>
+        </div>
+      </div>
+      <button class="btn-signin" onclick="doLogin()">Sign In Securely</button>
+      <p class="login-note">🔒 Authorised personnel only · Session expires in 45 min</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="pg-app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <img src="https://static.wixstatic.com/media/81ba89_81dcdb9d1e384b618fdc78760c61c426~mv2.png"
+           alt="" class="sb-logo" onerror="this.style.display='none'">
+      <div class="sb-title">
+        <div class="sb-name">Loyola College</div>
+        <div class="sb-sub">AZB Dept.</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-label">Main</div>
+      <button class="ni on" onclick="go('dashboard',this)"><span class="ni-icon">⊞</span>Dashboard</button>
+      <button class="ni" onclick="go('generate',this)"><span class="ni-icon">📄</span>Generate Sheet</button>
+      <div class="nav-label admin-only">Management</div>
+      <button class="ni admin-only" onclick="go('students',this)"><span class="ni-icon">👥</span>Student Database</button>
+      <button class="ni admin-only" onclick="go('academic',this)"><span class="ni-icon">📅</span>Academic Years</button>
+      <button class="ni admin-only" onclick="go('users',this)"><span class="ni-icon">🔑</span>User Accounts</button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-av" id="sbav">A</div>
+        <div>
+          <div class="sb-uname" id="sbname">Admin</div>
+          <div class="sb-urole" id="sbrole">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-lo" onclick="doLogout()">Sign Out</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sb-ov" onclick="closeSB()"></div>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="tb-left">
+        <button class="menu-btn" onclick="toggleSB()">☰</button>
+        <h2 class="tb-title" id="tbtitle">Dashboard</h2>
+      </div>
+      <div class="tb-right">
+        <span class="tb-timer" id="tbtimer">⏱ 45:00</span>
+        <span class="tb-ay" id="tbay">Loading…</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="sec on" id="sec-dashboard">
+        <div class="stats">
+          <div class="stat s1"><div class="stat-icon">👥</div><div class="stat-n" id="st-students">0</div><div class="stat-l">Students (Active Year)</div></div>
+          <div class="stat s2"><div class="stat-icon">📄</div><div class="stat-n" id="st-sheets">0</div><div class="stat-l">Sheets Generated</div></div>
+          <div class="stat s3"><div class="stat-icon">📚</div><div class="stat-n" id="st-classes">0</div><div class="stat-l">Classes</div></div>
+          <div class="stat s4"><div class="stat-icon">🗓</div><div class="stat-n" id="st-ay">—</div><div class="stat-l">Active Academic Year</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><h3>Recent Activity</h3></div>
+          <div class="card-body" id="act-list">
+            <div class="act-empty">No activity yet. Generate your first attendance sheet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERATE -->
+      <div class="sec" id="sec-generate">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l">
+            <h2>Generate Attendance Sheet</h2>
+            <p>Fill in event details, select classes, configure columns — then preview &amp; print.</p>
+          </div>
+        </div>
+        <div class="steps">
+
+          <!-- STEP 1 -->
+          <div class="step-card">
+            <div class="step-hdr">
+              <div class="step-badge">1</div>
+              <div><div class="step-title">Event Details</div><div class="step-sub">Programme / seminar / meeting / staff meeting information</div></div>
+            </div>
+            <div class="step-body">
+              <div class="g2" style="margin-bottom:14px">
+                <div class="f span2"><label>Event / Programme Name <span class="req">*</span></label>
+                  <input type="text" id="ev-name" placeholder="e.g. National Science Day Seminar 2026"></div>
+                <div class="f span2"><label>Venue <span class="req">*</span></label>
+                  <input type="text" id="ev-venue" placeholder="e.g. Seminar Hall, Block A, Loyola College"></div>
+                <div class="f"><label>Date <span class="req">*</span></label>
+                  <input type="date" id="ev-date" onchange="autoDay()"></div>
+                <div class="f"><label>Day (auto-filled)</label>
+                  <input type="text" id="ev-day" readonly placeholder="Auto-filled on date select"></div>
+                <div class="f"><label>Time From</label>
+                  <input type="time" id="ev-tfrom"></div>
+                <div class="f"><label>Time To</label>
+                  <input type="time" id="ev-tto"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step-card">
+            <div class="step-hdr">
+              <div class="step-badge">2</div>
+              <div><div class="step-title">Class Selection</div><div class="step-sub">Select one or more classes — each prints as a separate A4 sheet</div></div>
+            </div>
+            <div class="step-body">
+              <div class="class-grid" id="cls-grid">
+                <p style="color:var(--text3);font-size:13px">No students in active academic year. Add students in the Student Database section.</p>
+              </div>
+              <div class="cls-preview" id="cls-prev"></div>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step-card">
+            <div class="step-hdr">
+              <div class="step-badge">3</div>
+              <div><div class="step-title">Print Columns</div><div class="step-sub">Choose which student details and how many signature columns to include</div></div>
+            </div>
+            <div class="step-body">
+              <div class="col-label">Student Detail Columns (Sl. No., Dept. No., Name are always included)</div>
+              <div class="cb-grid" id="det-cols">
+                <label class="cb-item"><input type="checkbox" id="c-roll"><span>Roll Number</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-dob"><span>Date of Birth</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-contact"><span>Contact No.</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-email"><span>Email</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-father"><span>Father's Name</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-mother"><span>Mother's Name</span></label>
+                <label class="cb-item"><input type="checkbox" id="c-pcontact"><span>Parent Contact</span></label>
+              </div>
+              <div class="col-label" style="margin-top:16px">Signature Columns</div>
+              <div id="sig-list">
+                <div class="sig-row">
+                  <input type="text" value="Signature" placeholder="Column name">
+                  <button class="btn-rm" onclick="rmSig(this)" title="Remove">✕</button>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addSig()">+ Add Signature Column</button>
+            </div>
+          </div>
+
+          <!-- STEP 4 -->
+          <div class="step-card">
+            <div class="step-hdr">
+              <div class="step-badge">4</div>
+              <div><div class="step-title">Print Settings</div><div class="step-sub">Orientation and language — landscape is ideal for staff meetings with many columns</div></div>
+            </div>
+            <div class="step-body">
+              <div class="g2">
+                <div class="f"><label>Page Orientation</label>
+                  <div class="tog-group">
+                    <button class="tog-btn on" id="tog-p" onclick="setOrient('portrait',this)">⬜ Portrait</button>
+                    <button class="tog-btn" id="tog-l" onclick="setOrient('landscape',this)">⬛ Landscape</button>
+                  </div>
+                </div>
+                <div class="f"><label>Sheet Language</label>
+                  <select id="sh-lang"><option value="en">English</option><option value="ta">Tamil / தமிழ்</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5 -->
+          <div class="step-card">
+            <div class="step-hdr">
+              <div class="step-badge">5</div>
+              <div><div class="step-title">Signatories &amp; Footer</div><div class="step-sub">HOD is required. Other signatories appear only if name is filled.</div></div>
+            </div>
+            <div class="step-body">
+              <div class="sig-block mandatory">
+                <div class="sig-bl">
+                  <div class="sig-bl-name">Head of Department <span class="req-tag">Required</span></div>
+                </div>
+                <div class="g3">
+                  <div class="f"><label>Name</label><input type="text" id="hod-n" placeholder="Dr. / Prof."></div>
+                  <div class="f"><label>Designation</label><input type="text" id="hod-d" value="Head of the Department"></div>
+                  <div class="f"><label>Show Dept. in Footer?</label>
+                    <select id="hod-dept">
+                      <option value="yes">Yes — show department</option>
+                      <option value="no">No — name &amp; designation only</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div id="opt-sigs"></div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addOptSig()">+ Add Signatory</button>
+            </div>
+          </div>
+
+          <div class="act-bar">
+            <button class="btn btn-ghost" onclick="resetGen()">Reset Form</button>
+            <button class="btn btn-primary" onclick="doPreview()">Preview &amp; Print →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENT DATABASE -->
+      <div class="sec" id="sec-students">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Student Database</h2><p>Manage all students — data is linked to academic years.</p></div>
+        </div>
+        <div class="toolbar">
+          <div class="tbl-left">
+            <div class="search-wrap"><span class="search-icon">🔍</span>
+              <input type="text" id="s-search" placeholder="Search name, dept no, roll no…" oninput="filterSt()"></div>
+            <select class="flt" id="s-fcls" onchange="filterSt()"><option value="">All Classes</option></select>
+            <select class="flt" id="s-fay" onchange="filterSt()"><option value="">All Years</option></select>
+          </div>
+          <div class="tbl-right">
+            <button class="btn btn-ghost btn-sm" onclick="openImport()">⤓ Import CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddSt()">+ Add Student</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Dept. No.</th><th>Roll No.</th><th>Full Name</th>
+              <th>Class</th><th>Batch</th><th>Academic Year</th><th>Contact</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="st-tbody"></tbody>
+          </table>
+          <div class="tbl-empty" id="st-empty">No students found.</div>
+        </div>
+      </div>
+
+      <!-- ACADEMIC YEARS -->
+      <div class="sec" id="sec-academic">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Academic Years</h2><p>Only students in the active academic year appear in the class selector.</p></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddAY()">+ New Academic Year</button>
+        </div>
+        <div class="ay-grid" id="ay-grid"></div>
+      </div>
+
+      <!-- USERS -->
+      <div class="sec" id="sec-users">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>User Accounts</h2><p>Only Admin / HOD can create or manage staff accounts.</p></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddUser()">+ Add Account</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="u-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-area -->
+</div><!-- /pg-app -->
+
+<!-- ========== MODALS ========== -->
+
+<!-- Student Modal -->
+<div class="modal-ov hidden" id="m-student">
+  <div class="modal-box lg">
+    <div class="modal-hd"><h3 id="m-st-title">Add Student</h3><button class="modal-cl" onclick="closeM('m-student')">✕</button></div>
+    <div class="modal-bd">
+      <div class="g3">
+        <div class="f"><label>Dept. Number <span class="req">*</span></label><input type="text" id="ms-dept" placeholder="AZB-001"></div>
+        <div class="f"><label>Roll Number</label><input type="text" id="ms-roll" placeholder="23AZB001"></div>
+        <div class="f"><label>Full Name <span class="req">*</span></label><input type="text" id="ms-name" placeholder="Full name as in records"></div>
+        <div class="f"><label>Date of Birth</label><input type="date" id="ms-dob"></div>
+        <div class="f"><label>Contact Number</label><input type="tel" id="ms-contact" placeholder="9876543210"></div>
+        <div class="f"><label>Email</label><input type="email" id="ms-email" placeholder="student@mail.com"></div>
+        <div class="f"><label>Father's Name</label><input type="text" id="ms-father"></div>
+        <div class="f"><label>Mother's Name</label><input type="text" id="ms-mother"></div>
+        <div class="f"><label>Parent Contact</label><input type="tel" id="ms-pcon"></div>
+        <div class="f"><label>Class / Section <span class="req">*</span></label>
+          <select id="ms-cls">
+            <option value="">Select class</option>
+            <option>I B.Sc. Zoology</option><option>II B.Sc. Zoology</option><option>III B.Sc. Zoology</option>
+            <option>I B.Sc. Biotechnology</option><option>II B.Sc. Biotechnology</option><option>III B.Sc. Biotechnology</option>
+            <option>I M.Sc. Zoology</option><option>II M.Sc. Zoology</option>
+            <option>I M.Sc. Biotechnology</option><option>II M.Sc. Biotechnology</option>
+            <option>M.Phil. Zoology</option><option>M.Phil. Biotechnology</option>
+            <option>Ph.D. Zoology</option><option>Ph.D. Biotechnology</option>
+          </select>
+        </div>
+        <div class="f"><label>Batch</label><input type="text" id="ms-batch" placeholder="25-UAZ"></div>
+        <div class="f"><label>Academic Year <span class="req">*</span></label>
+          <select id="ms-ay"><option value="">Select year</option></select></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSt()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- AY Modal -->
+<div class="modal-ov hidden" id="m-ay">
+  <div class="modal-box">
+    <div class="modal-hd"><h3>New Academic Year</h3><button class="modal-cl" onclick="closeM('m-ay')">✕</button></div>
+    <div class="modal-bd">
+      <div class="g2">
+        <div class="f"><label>Label <span class="req">*</span></label><input type="text" id="ay-lbl" placeholder="e.g. 2026–2027"></div>
+        <div class="f"><label>Status</label>
+          <select id="ay-stat"><option value="yes">Active (current year)</option><option value="no">Inactive</option></select></div>
+        <div class="f"><label>Start Date <span class="req">*</span></label><input type="date" id="ay-s"></div>
+        <div class="f"><label>End Date <span class="req">*</span></label><input type="date" id="ay-e"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-ay')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAY()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal-ov hidden" id="m-user">
+  <div class="modal-box">
+    <div class="modal-hd"><h3>Add Staff Account</h3><button class="modal-cl" onclick="closeM('m-user')">✕</button></div>
+    <div class="modal-bd">
+      <div class="g2">
+        <div class="f"><label>Full Name <span class="req">*</span></label><input type="text" id="un-name" placeholder="Dr. / Mr. / Ms."></div>
+        <div class="f"><label>Username <span class="req">*</span></label><input type="text" id="un-user" placeholder="Unique login ID"></div>
+        <div class="f"><label>Password <span class="req">*</span></label><input type="password" id="un-pass" placeholder="Min. 8 characters"></div>
+        <div class="f"><label>Role</label>
+          <select id="un-role"><option value="staff">Staff</option><option value="admin">Admin / HOD</option></select></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-ov hidden" id="m-import">
+  <div class="modal-box">
+    <div class="modal-hd"><h3>Import Students from CSV</h3><button class="modal-cl" onclick="closeM('m-import')">✕</button></div>
+    <div class="modal-bd">
+      <div class="imp-info">
+        <strong>Required CSV column order:</strong>
+        <code>DeptNo, RollNo, FullName, DOB (YYYY-MM-DD), Class, Batch, Contact, Email, FatherName, MotherName, ParentContact</code>
+        <span class="dl-link" onclick="dlTemplate()">⤓ Download blank template</span>
+      </div>
+      <div class="f" style="margin-bottom:12px"><label>Assign to Academic Year <span class="req">*</span></label>
+        <select id="imp-ay"><option value="">Select academic year</option></select></div>
+      <div class="drop-z" id="drop-z" onclick="document.getElementById('csv-inp').click()">
+        <div class="drop-icon">📄</div>
+        Click to browse or drag &amp; drop your CSV file
+        <div class="drop-sub">.csv files only · Max 5 MB</div>
+      </div>
+      <input type="file" id="csv-inp" accept=".csv" style="display:none" onchange="handleCSV(this)">
+      <div id="imp-prev"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-import')">Cancel</button>
+      <button class="btn btn-primary" id="imp-confirm" onclick="confirmImport()" disabled>Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PRINT OVERLAY ========== -->
+<div id="print-ov">
+  <div class="print-bar no-print">
+    <div class="print-bar-l">
+      <button class="btn btn-ghost btn-sm" onclick="closePrint()">← Back</button>
+      <span class="print-sc" id="prt-count">1 sheet ready</span>
+    </div>
+    <button class="btn-print-main" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+  <div class="print-pages" id="print-pages"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA STORE — localStorage (swap get/set for Firebase calls)
+// ============================================================
+const K = k => 'azb2_' + k;
+const DB = {
+  get: k => { try { return JSON.parse(localStorage.getItem(K(k))) } catch(e) { return null } },
+  set: (k,v) => localStorage.setItem(K(k), JSON.stringify(v)),
+  push: (k,item) => { const a = DB.get(k)||[]; a.push(item); DB.set(k,a); return item },
+  update: (k,id,p) => { const a=DB.get(k)||[]; const i=a.findIndex(x=>x.id===id); if(i>=0){a[i]={...a[i],...p};DB.set(k,a)} },
+  del: (k,id) => DB.set(k,(DB.get(k)||[]).filter(x=>x.id!==id))
+};
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+// ============================================================
+// SEED DEFAULT DATA
+// ============================================================
+function seed(){
+  if(DB.get('seeded')) return;
+  DB.set('users',[
+    {id:'u1',username:'admin', password:'loyola@admin2025',role:'admin',fullName:'Dr. S. Jayakumar',active:true},
+    {id:'u2',username:'staff1',password:'staff@azb001',    role:'staff',fullName:'Mrs. R. Priya',   active:true},
+    {id:'u3',username:'staff2',password:'staff@azb002',    role:'staff',fullName:'Mr. K. Senthil',  active:true}
+  ]);
+  DB.set('academic_years',[
+    {id:'ay1',label:'2025–2026',start:'2025-06-15',end:'2026-04-15',active:false},
+    {id:'ay2',label:'2026–2027',start:'2026-06-15',end:'2027-04-15',active:true}
+  ]);
+  DB.set('students',[
+    {id:uid(),deptNo:'AZB-001',rollNo:'24AZB001',name:'Aarthi Murugan',      dob:'2005-03-12',cls:'I B.Sc. Zoology',       batch:'24-UBZ',ayId:'ay2',contact:'9876543210',email:'aarthi@mail.com',  father:'Murugan K',   mother:'Selvi M',  pcon:'9876543200'},
+    {id:uid(),deptNo:'AZB-002',rollNo:'24AZB002',name:'Bharath Raj S',        dob:'2004-07-22',cls:'I B.Sc. Zoology',       batch:'24-UBZ',ayId:'ay2',contact:'9865432109',email:'bharath@mail.com', father:'Selvam S',    mother:'Valli S',  pcon:'9865432100'},
+    {id:uid(),deptNo:'AZB-003',rollNo:'24AZB003',name:'Chitra Devi R',         dob:'2005-01-09',cls:'I B.Sc. Zoology',       batch:'24-UBZ',ayId:'ay2',contact:'9754321098',email:'chitra@mail.com',  father:'Rajan R',     mother:'Meena R',  pcon:'9754321000'},
+    {id:uid(),deptNo:'AZB-004',rollNo:'24AZB004',name:'Deepan Kumar P',        dob:'2004-11-30',cls:'I B.Sc. Zoology',       batch:'24-UBZ',ayId:'ay2',contact:'9643210987',email:'deepan@mail.com',  father:'Pandian P',   mother:'Sumathi P',pcon:'9643210900'},
+    {id:uid(),deptNo:'AZB-005',rollNo:'24AZB005',name:'Eswari T',              dob:'2005-05-14',cls:'I B.Sc. Zoology',       batch:'24-UBZ',ayId:'ay2',contact:'9532109876',email:'eswari@mail.com',  father:'Thangavel T', mother:'Kamala T', pcon:'9532109800'},
+    {id:uid(),deptNo:'AZB-011',rollNo:'23AZB001',name:'Fathima Nisha M',       dob:'2004-02-18',cls:'II B.Sc. Zoology',      batch:'23-UBZ',ayId:'ay2',contact:'9421098765',email:'fathima@mail.com', father:'Mohamed M',   mother:'Rabia M',  pcon:'9421098700'},
+    {id:uid(),deptNo:'AZB-012',rollNo:'23AZB002',name:'Ganesh Babu V',         dob:'2003-09-27',cls:'II B.Sc. Zoology',      batch:'23-UBZ',ayId:'ay2',contact:'9310987654',email:'ganesh@mail.com',  father:'Venkat V',    mother:'Priya V',  pcon:'9310987600'},
+    {id:uid(),deptNo:'AZB-021',rollNo:'24BT001', name:'Harini Priya K',         dob:'2005-04-03',cls:'I B.Sc. Biotechnology', batch:'24-UBT',ayId:'ay2',contact:'9209876543',email:'harini@mail.com',  father:'Karthik K',   mother:'Geetha K', pcon:'9209876500'},
+    {id:uid(),deptNo:'AZB-022',rollNo:'24BT002', name:'Imran Ali S',            dob:'2005-08-15',cls:'I B.Sc. Biotechnology', batch:'24-UBT',ayId:'ay2',contact:'9198765432',email:'imran@mail.com',   father:'Saleem S',    mother:'Zainab S', pcon:'9198765400'},
+    {id:uid(),deptNo:'AZB-031',rollNo:'24PGZ001',name:'Jayalakshmi C',          dob:'2002-12-20',cls:'I M.Sc. Zoology',       batch:'24-PGZ',ayId:'ay2',contact:'9087654321',email:'jaya@mail.com',    father:'Chandran C',  mother:'Lakshmi C',pcon:'9087654300'},
+    {id:uid(),deptNo:'AZB-032',rollNo:'24PGZ002',name:'Karthikeyan P',          dob:'2001-06-08',cls:'I M.Sc. Zoology',       batch:'24-PGZ',ayId:'ay2',contact:'8976543210',email:'karthi@mail.com',  father:'Perumal P',   mother:'Vasantha P',pcon:'8976543200'},
+    {id:uid(),deptNo:'AZB-041',rollNo:'24PGB001',name:'Lavanya Devi N',         dob:'2002-03-25',cls:'I M.Sc. Biotechnology', batch:'24-PGB',ayId:'ay2',contact:'8865432109',email:'lavanya@mail.com', father:'Natarajan N', mother:'Parvathi N',pcon:'8865432100'},
+  ]);
+  DB.set('sheets_count',0);
+  DB.set('activity',[]);
+  DB.set('seeded',true);
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let CU=null, ROLE='admin', ORIENT='portrait', EDIT_ST=null, IMPORT_DATA=[];
+let SESSION=45*60, SESS_INT=null, OPT_CNT=0;
+
+// ============================================================
+// AUTH
+// ============================================================
+function setRole(r,el){
+  ROLE=r;
+  document.querySelectorAll('.rtab').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+function togglePw(){
+  const i=document.getElementById('lp');
+  i.type=i.type==='password'?'text':'password';
+}
+function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  const users=DB.get('users')||[];
+  const user=users.find(x=>x.username===u&&x.password===p&&x.role===ROLE&&x.active);
+  if(!user){err.style.display='block';document.getElementById('lp').value='';return}
+  err.style.display='none';
+  CU=user;
+  startApp();
+}
+function doLogout(){
+  clearInterval(SESS_INT);CU=null;
+  document.getElementById('pg-app').style.display='none';
+  document.getElementById('pg-login').style.display='flex';
+  document.getElementById('lu').value='';document.getElementById('lp').value='';
+}
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ============================================================
+// APP START
+// ============================================================
+function startApp(){
+  document.getElementById('pg-login').style.display='none';
+  document.getElementById('pg-app').style.display='grid';
+  document.getElementById('sbav').textContent=CU.fullName[0].toUpperCase();
+  document.getElementById('sbname').textContent=CU.fullName;
+  document.getElementById('sbrole').textContent=CU.role==='admin'?'Administrator / HOD':'Staff Member';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=CU.role==='admin'?'':'none');
+  startSession();
+  loadAYBadge();
+  buildClassGrid();
+  fillAYDropdowns();
+  loadDash();
+  renderAYGrid();
+  renderStTable();
+  renderUsersTable();
+}
+
+// ============================================================
+// SESSION TIMER
+// ============================================================
+function startSession(){
+  clearInterval(SESS_INT);SESSION=45*60;
+  SESS_INT=setInterval(()=>{
+    SESSION--;
+    const m=String(Math.floor(SESSION/60)).padStart(2,'0');
+    const s=String(SESSION%60).padStart(2,'0');
+    const el=document.getElementById('tbtimer');
+    if(el)el.textContent=`⏱ ${m}:${s}`;
+    if(SESSION<=0){alert('Session expired. Please sign in again.');doLogout()}
+  },1000);
+  ['mousedown','keydown','touchstart','scroll'].forEach(e=>
+    document.addEventListener(e,()=>SESSION=45*60,{passive:true}));
+}
+
+// ============================================================
+// NAV
+// ============================================================
+const TITLES={dashboard:'Dashboard',generate:'Generate Attendance Sheet',
+  students:'Student Database',academic:'Academic Years',users:'User Accounts'};
+function go(page,el){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  const s=document.getElementById('sec-'+page);
+  if(s)s.classList.add('on');
+  const t=document.getElementById('tbtitle');
+  if(t)t.textContent=TITLES[page]||page;
+  closeSB();
+}
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-ov').classList.toggle('show')}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-ov').classList.remove('show')}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getActiveAY(){return (DB.get('academic_years')||[]).find(a=>a.active)||null}
+function fmtDate(d){if(!d||d==='—')return'—';try{return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}catch{return d}}
+function fmtTime(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';return`${h>12?h-12:h||12}:${String(m).padStart(2,'0')} ${ap}`}
+function loadAYBadge(){const ay=getActiveAY();const el=document.getElementById('tbay');if(el)el.textContent=ay?ay.label:'No Active Year'}
+function logActivity(txt){
+  const log=DB.get('activity')||[];
+  log.push({txt,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})});
+  if(log.length>30)log.shift();
+  DB.set('activity',log);
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function loadDash(){
+  const ay=getActiveAY();
+  const all=DB.get('students')||[];
+  const ayS=ay?all.filter(s=>s.ayId===ay.id):[];
+  const cls=[...new Set(ayS.map(s=>s.cls))];
+  document.getElementById('st-students').textContent=ayS.length;
+  document.getElementById('st-sheets').textContent=DB.get('sheets_count')||0;
+  document.getElementById('st-classes').textContent=cls.length;
+  document.getElementById('st-ay').textContent=ay?ay.label.replace('–','–'):'—';
+  const log=DB.get('activity')||[];
+  const el=document.getElementById('act-list');
+  if(log.length===0){el.innerHTML='<div class="act-empty">No activity yet. Generate your first attendance sheet.</div>';return}
+  el.innerHTML=log.slice().reverse().slice(0,8).map(a=>
+    `<div class="act-item"><div class="act-dot"></div><div class="act-text">${a.txt}</div><div class="act-time">${a.time}</div></div>`
+  ).join('');
+}
+
+// ============================================================
+// AUTO DAY
+// ============================================================
+function autoDay(){
+  const d=document.getElementById('ev-date').value;
+  if(!d)return;
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('ev-day').value=days[new Date(d+'T00:00:00').getDay()];
+}
+
+// ============================================================
+// CLASS GRID
+// ============================================================
+function buildClassGrid(){
+  const ay=getActiveAY();
+  const all=DB.get('students')||[];
+  const ayS=ay?all.filter(s=>s.ayId===ay.id):[];
+  const map={};
+  ayS.forEach(s=>{map[s.cls]=(map[s.cls]||0)+1});
+  const grid=document.getElementById('cls-grid');
+  if(Object.keys(map).length===0){
+    grid.innerHTML='<p style="color:var(--text3);font-size:13px">No students in active academic year. Add students in the Student Database section.</p>';
+    return;
+  }
+  grid.innerHTML=Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).map(([cls,cnt])=>`
+    <label class="cls-chip" id="chip-${btoa(cls).replace(/=/g,'')}">
+      <input type="checkbox" value="${cls}" onchange="updateClsPrev()">
+      <span class="cls-chip-name">${cls}</span>
+      <span class="cls-chip-cnt">${cnt}</span>
+    </label>`).join('');
+  document.querySelectorAll('.cls-chip').forEach(chip=>{
+    chip.querySelector('input').addEventListener('change',function(){
+      chip.classList.toggle('on',this.checked);
+    });
+  });
+}
+function updateClsPrev(){
+  const sel=[...document.querySelectorAll('#cls-grid input:checked')].map(i=>i.value);
+  document.getElementById('cls-prev').innerHTML=sel.map(c=>`<span class="cls-pill">${c}</span>`).join('');
+}
+
+// ============================================================
+// SIG COLS & OPT SIGS
+// ============================================================
+function addSig(){
+  const row=document.createElement('div');row.className='sig-row';
+  row.innerHTML=`<input type="text" placeholder="e.g. Signature 2 / Initial">
+    <button class="btn-rm" onclick="rmSig(this)" title="Remove">✕</button>`;
+  document.getElementById('sig-list').appendChild(row);
+}
+function rmSig(btn){
+  const rows=document.querySelectorAll('#sig-list .sig-row');
+  if(rows.length<=1)return;
+  btn.closest('.sig-row').remove();
+}
+function getSigs(){return[...document.querySelectorAll('#sig-list .sig-row input')].map(i=>i.value.trim()||'Signature')}
+
+function addOptSig(){
+  OPT_CNT++;
+  const id='os'+OPT_CNT;
+  const div=document.createElement('div');
+  div.className='sig-block';div.id=id;
+  div.innerHTML=`<div class="sig-bl">
+    <div class="sig-bl-name">Additional Signatory ${OPT_CNT}</div>
+    <button class="btn btn-ghost btn-xs" onclick="document.getElementById('${id}').remove()">Remove</button>
+  </div>
+  <div class="g3">
+    <div class="f"><label>Name</label><input type="text" class="os-n" placeholder="Dr. / Mr. / Ms."></div>
+    <div class="f"><label>Designation</label><input type="text" class="os-d" placeholder="e.g. Organiser"></div>
+    <div class="f"><label>Show Dept. in Footer?</label>
+      <select class="os-dept"><option value="yes">Yes</option><option value="no">No</option></select>
+    </div>
+  </div>`;
+  document.getElementById('opt-sigs').appendChild(div);
+}
+function getSignatories(){
+  const s=[];
+  const hn=document.getElementById('hod-n').value.trim();
+  const hd=document.getElementById('hod-d').value.trim()||'Head of the Department';
+  const hdept=document.getElementById('hod-dept').value==='yes';
+  s.push({name:hn,desig:hd,dept:hdept});
+  document.querySelectorAll('#opt-sigs .sig-block').forEach(b=>{
+    const n=b.querySelector('.os-n').value.trim();
+    const d=b.querySelector('.os-d').value.trim();
+    const dp=b.querySelector('.os-dept').value==='yes';
+    if(n||d)s.push({name:n,desig:d,dept:dp});
+  });
+  return s;
+}
+
+// ============================================================
+// ORIENTATION
+// ============================================================
+function setOrient(o,el){
+  ORIENT=o;
+  document.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ============================================================
+// RESET GENERATE FORM
+// ============================================================
+function resetGen(){
+  if(!confirm('Reset all fields?'))return;
+  ['ev-name','ev-venue','ev-date','ev-day','ev-tfrom','ev-tto','hod-n'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('hod-d').value='Head of the Department';
+  document.getElementById('hod-dept').value='yes';
+  document.getElementById('opt-sigs').innerHTML='';
+  document.getElementById('sig-list').innerHTML=`<div class="sig-row">
+    <input type="text" value="Signature" placeholder="Column name">
+    <button class="btn-rm" onclick="rmSig(this)" title="Remove">✕</button>
+  </div>`;
+  ['c-roll','c-dob','c-contact','c-email','c-father','c-mother','c-pcontact'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.checked=false;
+  });
+  document.querySelectorAll('#cls-grid input').forEach(c=>{c.checked=false;c.closest('.cls-chip')?.classList.remove('on')});
+  document.getElementById('cls-prev').innerHTML='';
+  ORIENT='portrait';
+  document.getElementById('tog-p').classList.add('on');
+  document.getElementById('tog-l').classList.remove('on');
+  document.getElementById('sh-lang').value='en';
+  OPT_CNT=0;
+}
+
+// ============================================================
+// GENERATE PREVIEW
+// ============================================================
+function doPreview(){
+  const evName=document.getElementById('ev-name').value.trim();
+  if(!evName){alert('Please enter the Event / Programme Name.');return}
+  const sel=[...document.querySelectorAll('#cls-grid input:checked')].map(i=>i.value);
+  if(sel.length===0){alert('Please select at least one class.');return}
+  const pages=document.getElementById('print-pages');
+  pages.innerHTML=sel.map(cls=>buildSheet(cls)).join('');
+  document.getElementById('prt-count').textContent=`${sel.length} sheet${sel.length>1?'s':''} ready to print`;
+  document.getElementById('print-ov').style.display='block';
+  const cnt=(DB.get('sheets_count')||0)+sel.length;
+  DB.set('sheets_count',cnt);
+  logActivity(`Sheet: "${evName}" — ${sel.join(', ')} — by ${CU.fullName}`);
+  loadDash();
+}
+function closePrint(){document.getElementById('print-ov').style.display='none'}
+
+function buildSheet(cls){
+  const ay=getActiveAY();
+  const all=DB.get('students')||[];
+  const sts=all.filter(s=>s.ayId===ay?.id&&s.cls===cls).sort((a,b)=>a.deptNo.localeCompare(b.deptNo));
+  const lang=document.getElementById('sh-lang').value;
+  const L=lang==='ta'?{
+    college:'லயோலா கல்லூரி (தன்னாட்சி), சென்னை – 600 034',
+    est:'1925ல் நிறுவப்பட்டது · சென்னை பல்கலைக்கழகம்',
+    dept:'மேம்பட்ட விலங்கியல் மற்றும் உயிரி தொழில்நுட்பத் துறை',
+    event:'நிகழ்வு',date:'தேதி',venue:'இடம்',time:'நேரம்',
+    class:'வகுப்பு',deptLbl:'துறை',
+    title:'வருகைப் பட்டியல்',
+    total:'மொத்த மாணவர்கள்',attended:'கலந்துகொண்டவர்கள்',
+    slno:'வ.எண்',dno:'துறை எண்',name:'பெயர்'
+  }:{
+    college:'Loyola College (Autonomous), Chennai – 600 034',
+    est:'Established 1925 · Affiliated to University of Madras',
+    dept:'Department of Advanced Zoology &amp; Biotechnology',
+    event:'Event',date:'Date',venue:'Venue',time:'Time',
+    class:'Class / Section',deptLbl:'Department',
+    title:'ATTENDANCE SHEET',
+    total:'Total Enrolled',attended:'Total Present',
+    slno:'Sl. No.',dno:'Dept. No.',name:'Student Name'
+  };
+
+  const detCols=[
+    {id:'c-roll', label:'Roll No.', key:'rollNo'},
+    {id:'c-dob',  label:'Date of Birth', key:'dob', fmt:true},
+    {id:'c-contact',label:'Contact',key:'contact'},
+    {id:'c-email',  label:'Email',   key:'email'},
+    {id:'c-father', label:"Father's Name",key:'father'},
+    {id:'c-mother', label:"Mother's Name",key:'mother'},
+    {id:'c-pcontact',label:'Parent Contact',key:'pcon'},
+  ].filter(c=>document.getElementById(c.id)?.checked);
+
+  const sigCols=getSigs();
+  const evName=document.getElementById('ev-name').value.trim();
+  const evVenue=document.getElementById('ev-venue').value.trim();
+  const evDate=fmtDate(document.getElementById('ev-date').value);
+  const evDay=document.getElementById('ev-day').value;
+  const evFrom=fmtTime(document.getElementById('ev-tfrom').value);
+  const evTo=fmtTime(document.getElementById('ev-tto').value);
+  const timeStr=evFrom&&evTo?`${evFrom} – ${evTo}`:evFrom||evTo||'—';
+  const sigs=getSignatories();
+
+  const thead=`<tr>
+    <th class="td-num">${L.slno}</th>
+    <th class="td-dept">${L.dno}</th>
+    <th>${L.name}</th>
+    ${detCols.map(c=>`<th>${c.label}</th>`).join('')}
+    ${sigCols.map(s=>`<th class="td-sig">${s}</th>`).join('')}
+  </tr>`;
+
+  const tbody=sts.map((st,i)=>`<tr>
+    <td class="td-num">${i+1}</td>
+    <td class="td-dept">${st.deptNo}</td>
+    <td>${st.name}</td>
+    ${detCols.map(c=>`<td>${c.fmt&&st[c.key]?fmtDate(st[c.key]):st[c.key]||''}</td>`).join('')}
+    ${sigCols.map(()=>`<td class="td-sig"></td>`).join('')}
+  </tr>`).join('');
+
+  const footSigs=sigs.map(sig=>`
+    <div class="sh-sig">
+      <div class="sh-sign-area"></div>
+      <div class="sh-sig-name">${sig.name||'___________________'}</div>
+      <div class="sh-sig-desig">${sig.desig}</div>
+      ${sig.dept?`<div class="sh-sig-dept">Dept. of Advanced Zoology &amp; Biotechnology</div>
+      <div class="sh-sig-dept">Loyola College, Chennai – 600 034</div>`
+      :`<div class="sh-sig-dept">Loyola College, Chennai – 600 034</div>`}
+    </div>`).join('');
+
+  return `<div class="a4 ${ORIENT}">
+    <div class="sh-head">
+      <img src="https://static.wixstatic.com/media/81ba89_81dcdb9d1e384b618fdc78760c61c426~mv2.png"
+           alt="Loyola" class="sh-logo" onerror="this.style.display='none'">
+      <div class="sh-head-text">
+        <div class="sh-college">${L.college}</div>
+        <div class="sh-est">${L.est}</div>
+        <div class="sh-dept">${L.dept}</div>
+      </div>
+    </div>
+    <div class="sh-title-wrap"><div class="sh-title">${L.title} — ${evName.toUpperCase()}</div></div>
+    <div class="sh-meta">
+      <div class="sh-mc"><span class="sh-ml">${L.event}:</span><span class="sh-mv">${evName}</span></div>
+      <div class="sh-mc"><span class="sh-ml">${L.date}:</span><span class="sh-mv">${evDate}${evDay?' ('+evDay+')':''}</span></div>
+      <div class="sh-mc"><span class="sh-ml">${L.venue}:</span><span class="sh-mv">${evVenue||'—'}</span></div>
+      <div class="sh-mc"><span class="sh-ml">${L.time}:</span><span class="sh-mv">${timeStr}</span></div>
+      <div class="sh-mc"><span class="sh-ml">${L.class}:</span><span class="sh-mv">${cls}</span></div>
+      <div class="sh-mc"><span class="sh-ml">${L.deptLbl}:</span><span class="sh-mv">Advanced Zoology &amp; Biotechnology</span></div>
+    </div>
+    <table class="sh-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
+    <div class="sh-totals">
+      <div class="sh-tot"><div class="sh-tot-l">${L.total}</div><div class="sh-tot-v">${sts.length}</div></div>
+      <div class="sh-tot"><div class="sh-tot-l">${L.attended}</div><div class="sh-tot-v att">&nbsp;&nbsp;&nbsp;</div></div>
+    </div>
+    <div class="sh-foot"><div class="sh-sigs">${footSigs||`<div class="sh-sig">
+      <div class="sh-sign-area"></div><div class="sh-sig-name">___________________</div>
+      <div class="sh-sig-desig">Head of the Department</div>
+      <div class="sh-sig-dept">Dept. of Advanced Zoology &amp; Biotechnology</div>
+      <div class="sh-sig-dept">Loyola College, Chennai – 600 034</div></div>`}
+    </div></div>
+  </div>`;
+}
+
+// ============================================================
+// STUDENT DB
+// ============================================================
+function renderStTable(){filterSt();buildFilterDropdowns()}
+
+function buildFilterDropdowns(){
+  const all=DB.get('students')||[];
+  const cls=[...new Set(all.map(s=>s.cls))].sort();
+  const ays=DB.get('academic_years')||[];
+  const fc=document.getElementById('s-fcls'),fa=document.getElementById('s-fay');
+  if(!fc||!fa)return;
+  const pc=fc.value,pa=fa.value;
+  fc.innerHTML='<option value="">All Classes</option>'+cls.map(c=>`<option value="${c}"${c===pc?' selected':''}>${c}</option>`).join('');
+  fa.innerHTML='<option value="">All Years</option>'+ays.map(a=>`<option value="${a.id}"${a.id===pa?' selected':''}>${a.label}</option>`).join('');
+}
+
+function filterSt(){
+  const q=(document.getElementById('s-search')?.value||'').toLowerCase();
+  const cf=document.getElementById('s-fcls')?.value||'';
+  const af=document.getElementById('s-fay')?.value||'';
+  let sts=DB.get('students')||[];
+  if(q)sts=sts.filter(s=>s.name.toLowerCase().includes(q)||(s.deptNo||'').toLowerCase().includes(q)||(s.rollNo||'').toLowerCase().includes(q));
+  if(cf)sts=sts.filter(s=>s.cls===cf);
+  if(af)sts=sts.filter(s=>s.ayId===af);
+  const tbody=document.getElementById('st-tbody');
+  const empty=document.getElementById('st-empty');
+  if(!tbody)return;
+  if(sts.length===0){tbody.innerHTML='';if(empty)empty.style.display='block';return}
+  if(empty)empty.style.display='none';
+  const ays=DB.get('academic_years')||[];
+  tbody.innerHTML=sts.map(s=>{
+    const ayl=ays.find(a=>a.id===s.ayId)?.label||s.ayId;
+    return`<tr>
+      <td><strong>${s.deptNo}</strong></td><td>${s.rollNo||'—'}</td>
+      <td>${s.name}</td><td>${s.cls}</td><td>${s.batch||'—'}</td>
+      <td>${ayl}</td><td>${s.contact||'—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-xs" onclick="editSt('${s.id}')">Edit</button>
+        <button class="btn btn-xs" style="background:#FEF0F0;border:1px solid #FBCACA;color:var(--red)" onclick="delSt('${s.id}')">Delete</button>
+      </td>
+    </tr>`}).join('');
+}
+
+function openAddSt(){
+  EDIT_ST=null;
+  document.getElementById('m-st-title').textContent='Add Student';
+  ['ms-dept','ms-roll','ms-name','ms-dob','ms-contact','ms-email','ms-father','ms-mother','ms-pcon','ms-batch'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('ms-cls').value='';document.getElementById('ms-ay').value='';
+  openM('m-student');
+}
+function editSt(id){
+  const s=(DB.get('students')||[]).find(x=>x.id===id);if(!s)return;
+  EDIT_ST=id;
+  document.getElementById('m-st-title').textContent='Edit Student';
+  document.getElementById('ms-dept').value=s.deptNo||'';
+  document.getElementById('ms-roll').value=s.rollNo||'';
+  document.getElementById('ms-name').value=s.name||'';
+  document.getElementById('ms-dob').value=s.dob||'';
+  document.getElementById('ms-contact').value=s.contact||'';
+  document.getElementById('ms-email').value=s.email||'';
+  document.getElementById('ms-father').value=s.father||'';
+  document.getElementById('ms-mother').value=s.mother||'';
+  document.getElementById('ms-pcon').value=s.pcon||'';
+  document.getElementById('ms-cls').value=s.cls||'';
+  document.getElementById('ms-batch').value=s.batch||'';
+  document.getElementById('ms-ay').value=s.ayId||'';
+  openM('m-student');
+}
+function saveSt(){
+  const dept=document.getElementById('ms-dept').value.trim();
+  const name=document.getElementById('ms-name').value.trim();
+  const cls=document.getElementById('ms-cls').value;
+  const ayId=document.getElementById('ms-ay').value;
+  if(!dept||!name||!cls||!ayId){alert('Dept. No., Name, Class and Academic Year are required.');return}
+  const data={deptNo:dept,rollNo:document.getElementById('ms-roll').value.trim(),
+    name,dob:document.getElementById('ms-dob').value,
+    cls,batch:document.getElementById('ms-batch').value.trim(),ayId,
+    contact:document.getElementById('ms-contact').value.trim(),
+    email:document.getElementById('ms-email').value.trim(),
+    father:document.getElementById('ms-father').value.trim(),
+    mother:document.getElementById('ms-mother').value.trim(),
+    pcon:document.getElementById('ms-pcon').value.trim()};
+  if(EDIT_ST)DB.update('students',EDIT_ST,data);
+  else DB.push('students',{...data,id:uid()});
+  closeM('m-student');renderStTable();buildClassGrid();loadDash();buildFilterDropdowns();
+}
+function delSt(id){
+  if(!confirm('Delete this student record?'))return;
+  DB.del('students',id);renderStTable();buildClassGrid();loadDash();buildFilterDropdowns();
+}
+
+// ============================================================
+// ACADEMIC YEARS
+// ============================================================
+function fillAYDropdowns(){
+  const ays=DB.get('academic_years')||[];
+  ['ms-ay','imp-ay'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML='<option value="">Select academic year</option>'+
+      ays.map(a=>`<option value="${a.id}"${a.active?' selected':''}>${a.label}</option>`).join('');
+  });
+}
+function renderAYGrid(){
+  const ays=DB.get('academic_years')||[];
+  const grid=document.getElementById('ay-grid');if(!grid)return;
+  if(ays.length===0){grid.innerHTML='<p style="color:var(--text3);padding:20px 0">No academic years defined. Create one to get started.</p>';return}
+  grid.innerHTML=ays.map(ay=>`
+    <div class="ay-card${ay.active?' ay-active':''}">
+      <div class="ay-name">${ay.label}</div>
+      <div class="ay-dates">${fmtDate(ay.start)} → ${fmtDate(ay.end)}</div>
+      <span class="tag${ay.active?' tag-active':' tag-inactive'}">${ay.active?'● Active':'Inactive'}</span>
+      <div class="ay-actions">
+        ${!ay.active?`<button class="btn-ay-act" onclick="activateAY('${ay.id}')">Set Active</button>`:''}
+        <button class="btn-ay-del" onclick="deleteAY('${ay.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function openAddAY(){openM('m-ay');['ay-lbl','ay-s','ay-e'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''})}
+function saveAY(){
+  const lbl=document.getElementById('ay-lbl').value.trim();
+  const s=document.getElementById('ay-s').value;
+  const e=document.getElementById('ay-e').value;
+  const act=document.getElementById('ay-stat').value==='yes';
+  if(!lbl||!s||!e){alert('All fields are required.');return}
+  const ays=DB.get('academic_years')||[];
+  if(act)ays.forEach(a=>a.active=false);
+  ays.push({id:uid(),label:lbl,start:s,end:e,active:act});
+  DB.set('academic_years',ays);
+  closeM('m-ay');renderAYGrid();fillAYDropdowns();loadAYBadge();buildClassGrid();loadDash();
+}
+function activateAY(id){
+  const ays=DB.get('academic_years')||[];
+  ays.forEach(a=>a.active=a.id===id);
+  DB.set('academic_years',ays);
+  renderAYGrid();loadAYBadge();buildClassGrid();loadDash();fillAYDropdowns();
+}
+function deleteAY(id){
+  if(!confirm('Delete this academic year? Students linked to it are not deleted.'))return;
+  DB.del('academic_years',id);renderAYGrid();loadAYBadge();buildClassGrid();loadDash();fillAYDropdowns();
+}
+
+// ============================================================
+// USERS
+// ============================================================
+function renderUsersTable(){
+  const users=DB.get('users')||[];
+  const tbody=document.getElementById('u-tbody');if(!tbody)return;
+  tbody.innerHTML=users.map(u=>`<tr>
+    <td><strong>${u.username}</strong></td><td>${u.fullName}</td>
+    <td><span class="tag ${u.role==='admin'?'tag-admin':'tag-staff'}">${u.role==='admin'?'Admin / HOD':'Staff'}</span></td>
+    <td><span class="tag ${u.active?'tag-active':'tag-inactive'}">${u.active?'Active':'Inactive'}</span></td>
+    <td>
+      <button class="btn btn-ghost btn-xs" onclick="toggleUser('${u.id}')">${u.active?'Deactivate':'Activate'}</button>
+      ${u.role!=='admin'?`<button class="btn btn-xs" style="background:#FEF0F0;border:1px solid #FBCACA;color:var(--red);margin-left:4px" onclick="delUser('${u.id}')">Delete</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+function openAddUser(){openM('m-user');['un-name','un-user','un-pass'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''})}
+function saveUser(){
+  const nm=document.getElementById('un-name').value.trim();
+  const un=document.getElementById('un-user').value.trim();
+  const pw=document.getElementById('un-pass').value;
+  const rl=document.getElementById('un-role').value;
+  if(!nm||!un||!pw){alert('All fields are required.');return}
+  if(pw.length<8){alert('Password must be at least 8 characters.');return}
+  const users=DB.get('users')||[];
+  if(users.find(u=>u.username===un)){alert('Username already exists.');return}
+  DB.push('users',{id:uid(),fullName:nm,username:un,password:pw,role:rl,active:true});
+  closeM('m-user');renderUsersTable();
+}
+function toggleUser(id){
+  const users=DB.get('users')||[];
+  const u=users.find(x=>x.id===id);if(u)u.active=!u.active;
+  DB.set('users',users);renderUsersTable();
+}
+function delUser(id){
+  if(!confirm('Delete this account?'))return;
+  DB.del('users',id);renderUsersTable();
+}
+
+// ============================================================
+// CSV IMPORT
+// ============================================================
+function openImport(){
+  IMPORT_DATA=[];
+  document.getElementById('imp-prev').innerHTML='';
+  document.getElementById('imp-confirm').disabled=true;
+  document.getElementById('csv-inp').value='';
+  openM('m-import');
+}
+function dlTemplate(){
+  const h='DeptNo,RollNo,FullName,DOB,Class,Batch,Contact,Email,FatherName,MotherName,ParentContact';
+  const r='AZB-001,24AZB001,Student Name,2005-03-12,I B.Sc. Zoology,24-UBZ,9876543210,student@mail.com,Father Name,Mother Name,9876543200';
+  const blob=new Blob([h+'\n'+r],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='azb_students_template.csv';a.click();
+}
+function handleCSV(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split(/\r?\n/).filter(l=>l.trim());
+    const hdrs=lines[0].split(',').map(h=>h.trim());
+    IMPORT_DATA=lines.slice(1).map(line=>{
+      const vals=line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+      const o={};hdrs.forEach((h,i)=>o[h]=vals[i]||'');
+      return{id:uid(),deptNo:o.DeptNo,rollNo:o.RollNo,name:o.FullName,
+        dob:o.DOB,cls:o.Class,batch:o.Batch,contact:o.Contact,
+        email:o.Email,father:o.FatherName,mother:o.MotherName,pcon:o.ParentContact,ayId:''};
+    }).filter(s=>s.name&&s.deptNo);
+    document.getElementById('imp-prev').innerHTML=`
+      <div style="margin-top:12px;padding:10px 14px;background:#D4EDDA;border:1px solid #A3CDB1;border-radius:var(--r);font-size:13px;color:#155724">
+        ✓ <strong>${IMPORT_DATA.length}</strong> valid student records found. Select academic year above and click Import.
+      </div>`;
+    document.getElementById('imp-confirm').disabled=false;
+  };
+  reader.readAsText(file);
+}
+function confirmImport(){
+  const ayId=document.getElementById('imp-ay').value;
+  if(!ayId){alert('Please select an academic year.');return}
+  const existing=DB.get('students')||[];
+  DB.set('students',[...existing,...IMPORT_DATA.map(s=>({...s,ayId}))]);
+  closeM('m-import');renderStTable();buildClassGrid();loadDash();buildFilterDropdowns();
+  logActivity(`Imported ${IMPORT_DATA.length} students by ${CU.fullName}`);
+  alert(`✓ Successfully imported ${IMPORT_DATA.length} students.`);
+}
+
+// Drop zone
+document.addEventListener('DOMContentLoaded',()=>{
+  const dz=document.getElementById('drop-z');
+  if(dz){
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--maroon)'});
+    dz.addEventListener('dragleave',()=>{dz.style.borderColor=''});
+    dz.addEventListener('drop',e=>{
+      e.preventDefault();dz.style.borderColor='';
+      const f=e.dataTransfer.files[0];
+      if(f){const inp=document.getElementById('csv-inp');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleCSV(inp)}
+    });
+  }
+});
+
+// ============================================================
+// MODAL HELPERS
+// ============================================================
+function openM(id){document.getElementById(id).classList.remove('hidden')}
+function closeM(id){document.getElementById(id).classList.add('hidden')}
+document.querySelectorAll('.modal-ov').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')});
+});
+
+// ============================================================
+// BOOT
+// ============================================================
+seed();
+</script>
+</body>
+</html>
+HTMLEOF
